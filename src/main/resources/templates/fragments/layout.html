@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+
+<th:block th:fragment="head(title)">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${title}">SRM1</title>
+    <link rel="stylesheet" th:href="@{/css/app.css}">
+</th:block>
+
+<div th:fragment="sidebar(tenant, tenantSlug)">
+    <aside class="sidebar" th:if="${tenant != null}">
+        <div class="sidebar-title" th:text="${tenant.name}">Tenant</div>
+        <div class="sidebar-subtitle">Tenant Yönetimi</div>
+
+        <div class="tenant-plan-box">
+            <div><strong>Plan:</strong> <span th:text="${tenant.plan}">BASIC</span></div>
+            <div><strong>Öğrenci Limit:</strong> <span th:text="${tenant.studentLimit}">100</span></div>
+            <div class="tenant-plan-action">
+                <a th:href="@{/{tenantSlug}/plans(tenantSlug=${tenantSlug})}">Planları Gör</a>
+            </div>
+        </div>
+
+        <nav class="menu">
+            <a th:href="@{/{tenantSlug}(tenantSlug=${tenantSlug})}">Dashboard</a>
+            <a th:href="@{/{tenantSlug}/students(tenantSlug=${tenantSlug})}">Students</a>
+            <a th:href="@{/{tenantSlug}/plans(tenantSlug=${tenantSlug})}">Planlar</a>
+            <a th:href="@{/{tenantSlug}/payments(tenantSlug=${tenantSlug})}">Payment</a>
+            <a th:href="@{/{tenantSlug}/terms(tenantSlug=${tenantSlug})}">Dönemler</a>
+            <a th:href="@{/{tenantSlug}/classrooms(tenantSlug=${tenantSlug})}">Sınıflar</a>
+        </nav>
+    </aside>
+</div>
+
+</body>
+</html>

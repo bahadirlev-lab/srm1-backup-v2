@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <th:block th:replace="~{fragments/layout :: head(${pageTitle})}"></th:block>
+</head>
+<body>
+
+<div class="app-shell">
+    <div th:replace="~{fragments/layout :: sidebar(${tenant}, ${tenantSlug})}"></div>
+
+    <main class="content-area">
+        <div class="page-container">
+            <div class="card">
+                <h1>Students</h1>
+
+                <div class="alert alert-info">
+                    Toplam Öğrenci: <strong th:text="${studentCount}">0</strong>
+                    /
+                    Limit: <strong th:text="${studentLimit}">100</strong>
+                </div>
+
+                <div th:if="${successMessage != null}" class="alert alert-success" th:text="${successMessage}">
+                    Başarılı
+                </div>
+
+                <div th:if="${errorMessage != null}" class="alert alert-error" th:text="${errorMessage}">
+                    Hata
+                </div>
+
+                <div class="actions" th:if="${!limitReached}">
+                    <a th:href="@{/{tenantSlug}/students/new(tenantSlug=${tenantSlug})}">Yeni öğrenci</a>
+                </div>
+
+                <div th:if="${limitReached}" class="alert alert-info">
+                    Öğrenci limiti dolduğu için yeni kayıt eklenemiyor.
+                    <a th:href="@{/{tenantSlug}/plans(tenantSlug=${tenantSlug})}">PRO plan'a geç</a>
+                </div>
+
+                <table>
+                    <tr>
+                        <th>ID</th>
+                        <th>Ad</th>
+                        <th>Telefon</th>
+                        <th>Aktif</th>
+                        <th>İşlem</th>
+                    </tr>
+
+                    <tr th:if="${#lists.isEmpty(students)}">
+                        <td colspan="5">Henüz öğrenci yok.</td>
+                    </tr>
+
+                    <tr th:each="s : ${students}">
+                        <td th:text="${s.id}"></td>
+                        <td th:text="${s.name}"></td>
+                        <td th:text="${s.phone}"></td>
+                        <td th:text="${s.active}"></td>
+                        <td>
+                            <form th:action="@{/{tenantSlug}/students/{studentId}/delete(tenantSlug=${tenantSlug}, studentId=${s.id})}"
+                                  method="post"
+                                  onsubmit="return confirm('Bu öğrenciyi silmek istiyor musunuz?');">
+                                <button type="submit">Sil</button>
+                            </form>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+    </main>
+</div>
+
+</body>
+</html>

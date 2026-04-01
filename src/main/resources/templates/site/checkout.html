@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${pageTitle}">Ödeme</title>
+    <link rel="stylesheet" th:href="@{/css/public.css}">
+</head>
+<body>
+<div class="page-narrow">
+    <div class="header">
+        <h1 th:text="${product.name + ' Ödeme Alanı'}">Ödeme Alanı</h1>
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="card">
+        <div class="price">
+            Fiyat: <span th:text="${product.priceText}">999,00 TL</span>
+        </div>
+
+        <div class="note">
+            Bu aşamada demo ödeme akışı çalışır. Butona basınca ödeme başarılı kabul edilir.
+        </div>
+
+        <form th:action="@{/site/products/{productCode}/checkout(productCode=${product.code})}" method="post">
+            <button class="button" type="submit">Ödemeyi Tamamla</button>
+        </form>
+    </div>
+</div>
+</body>
+</html>

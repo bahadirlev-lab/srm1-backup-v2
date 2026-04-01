@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <th:block th:replace="~{fragments/layout :: head(${pageTitle})}"></th:block>
+</head>
+<body>
+
+<div class="app-shell">
+    <div th:replace="~{fragments/layout :: sidebar(${tenant}, ${tenantSlug})}"></div>
+
+    <main class="content-area">
+        <div class="page-container">
+            <div class="card">
+                <h1>Yeni Student</h1>
+
+                <p>
+                    <a class="button-link"
+                       th:href="@{/{tenantSlug}/students(tenantSlug=${tenantSlug})}">
+                        Listeye dön
+                    </a>
+                </p>
+
+                <div th:if="${errorMessage != null}" class="alert alert-error" th:text="${errorMessage}">
+                    Hata
+                </div>
+
+                <form th:action="@{/{tenantSlug}/students(tenantSlug=${tenantSlug})}" method="post" th:object="${student}">
+                    <div class="field">
+                        <label>Ad</label>
+                        <input type="text" th:field="*{name}">
+                    </div>
+
+                    <div class="field">
+                        <label>Telefon</label>
+                        <input type="text" th:field="*{phone}">
+                    </div>
+
+                    <div class="field">
+                        <label>
+                            <input type="checkbox" th:field="*{active}">
+                            Aktif
+                        </label>
+                    </div>
+
+                    <button type="submit">Kaydet</button>
+                </form>
+            </div>
+        </div>
+    </main>
+</div>
+
+</body>
+</html>

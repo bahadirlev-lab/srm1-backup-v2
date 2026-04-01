@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <th:block th:replace="~{fragments/layout :: head(${pageTitle})}"></th:block>
+</head>
+<body>
+
+<div class="app-shell">
+    <div th:replace="~{fragments/layout :: sidebar(${tenant}, ${tenantSlug})}"></div>
+
+    <main class="content-area">
+        <div class="page-container">
+            <div class="card">
+                <h1>Planlar</h1>
+
+                <div class="alert alert-info">
+                    Mevcut plan: <strong th:text="${tenant.plan}">BASIC</strong> |
+                    Toplam öğrenci: <strong th:text="${studentCount}">0</strong> |
+                    Limit: <strong th:text="${tenant.studentLimit}">100</strong>
+                </div>
+
+                <div class="plan-grid">
+                    <div class="plan-card" th:classappend="${!isPro} ? ' current-plan'">
+                        <div class="plan-badge">Başlangıç Planı</div>
+                        <h2>BASIC</h2>
+                        <ul class="plan-list">
+                            <li>Öğrenci limiti: <strong th:text="${basicLimit}">100</strong></li>
+                            <li>Temel otomasyon modülleri</li>
+                            <li>Küçük kurumlar için uygun</li>
+                        </ul>
+
+                        <button type="button" disabled th:if="${!isPro}">Aktif Plan</button>
+                        <button type="button" disabled th:if="${isPro}">Alt Plan</button>
+                    </div>
+
+                    <div class="plan-card" th:classappend="${isPro} ? ' current-plan'">
+                        <div class="plan-badge">Önerilen Plan</div>
+                        <h2>PRO</h2>
+                        <ul class="plan-list">
+                            <li>Öğrenci limiti: <strong th:text="${proLimit}">1000</strong></li>
+                            <li>Daha büyük kurumlar için geniş kapasite</li>
+                            <li>Limit dolmadan büyüme imkanı</li>
+                        </ul>
+
+                        <button type="button" disabled th:if="${isPro}">Aktif Plan</button>
+
+                        <form th:if="${!isPro}"
+                              th:action="@{/{tenantSlug}/plans/upgrade(tenantSlug=${tenantSlug})}"
+                              method="post">
+                            <button type="submit">PRO Plan'a Geç</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <th:block th:replace="~{fragments/layout :: head(${pageTitle})}"></th:block>
+</head>
+<body>
+
+<div class="app-shell">
+    <div th:replace="~{fragments/layout :: sidebar(${tenant}, ${tenantSlug})}"></div>
+
+    <main class="content-area">
+        <div class="page-container">
+            <div class="card">
+                <h1>Dashboard</h1>
+
+                <p th:text="${message}">Mesaj</p>
+
+                <div th:if="${tenant != null}">
+                    <p><strong>ID:</strong> <span th:text="${tenant.id}">1</span></p>
+                    <p><strong>Ad:</strong> <span th:text="${tenant.name}">Kurs Merkezi</span></p>
+                    <p><strong>Slug:</strong> <span th:text="${tenant.slug}">kurs-merkezi</span></p>
+                </div>
+
+                <p th:if="${tenant == null}" class="muted">
+                    Örnek kullanım: /kurs-merkezi
+                </p>
+            </div>
+        </div>
+    </main>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${pageTitle}">BHDR Otomasyon Sistemleri</title>
+    <link rel="stylesheet" th:href="@{/css/public.css}">
+</head>
+<body>
+<div class="page">
+    <section class="hero">
+        <h1>BHDR OTOMOSYON SİSTEMLERİ</h1>
+        <p>Kurumunuza uygun otomasyonu seçin, satın alın ve kullanmaya başlayın.</p>
+    </section>
+
+    <div class="divider"></div>
+
+    <section class="product-grid">
+        <a class="product-card"
+           th:each="product : ${products}"
+           th:href="@{/site/products/{productCode}(productCode=${product.code})}">
+            <h2 th:text="${product.name}">Ürün</h2>
+            <p th:text="${product.shortDescription}">Açıklama</p>
+            <div class="product-price" th:text="${product.priceText}">999,00 TL</div>
+        </a>
+    </section>
+</div>
+</body>
+</html>

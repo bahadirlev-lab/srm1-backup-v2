@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${pageTitle}">Ödeme Başarılı</title>
+    <link rel="stylesheet" th:href="@{/css/public.css}">
+</head>
+<body>
+<div class="page-narrow">
+    <div class="header">
+        <h1>Ödeme Başarılı</h1>
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="card">
+        <div class="price">
+            <span th:text="${product.priceText}">999,00 TL</span> tahsil edildi
+        </div>
+
+        <div class="note">
+            <strong th:text="${product.name}">Ürün</strong> için ödeme başarıyla alındı.
+            Şimdi kurum bilgilerini girip otomasyonunuzu oluşturmaya geçebilirsiniz.
+        </div>
+
+        <div class="actions">
+            <a class="button"
+               th:href="@{/site/products/{productCode}/setup(productCode=${product.code}, paymentToken=${paymentToken})}">
+                Kuruluma Geç
+            </a>
+
+            <a class="button" th:href="@{/site}">
+                Ana Sayfa
+            </a>
+        </div>
+    </div>
+</div>
+</body>
+</html>

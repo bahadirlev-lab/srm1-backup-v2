@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${pageTitle}">Kurulum</title>
+    <link rel="stylesheet" th:href="@{/css/public.css}">
+</head>
+<body>
+<div class="page-narrow">
+    <div class="header">
+        <h1 th:text="${product.name + ' Ayarlar'}">Ayarlar</h1>
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="card">
+        <p class="note">
+            Ödeme alındı. Kurum adını girin, tenant oluşturulsun ve otomasyona geçilsin.
+        </p>
+
+        <p th:if="${errorMessage != null}"
+           style="color:#b00020; font-weight:700; margin-bottom:16px;"
+           th:text="${errorMessage}">
+            Hata mesajı
+        </p>
+
+        <form th:action="@{/site/products/{productCode}/setup(productCode=${product.code}, paymentToken=${paymentToken})}"
+              method="post"
+              th:object="${setupForm}">
+
+            <div class="field">
+                <label>Kurum Adı</label>
+                <input type="text"
+                       th:field="*{institutionName}"
+                       placeholder="Örn: Yıldız Kurs Merkezi">
+            </div>
+
+            <button class="button" type="submit">İlerle</button>
+        </form>
+    </div>
+</div>
+</body>
+</html>

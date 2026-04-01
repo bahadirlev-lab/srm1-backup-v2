@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <th:block th:replace="~{fragments/layout :: head(${pageTitle})}"></th:block>
+</head>
+<body>
+
+<div class="app-shell">
+    <div th:replace="~{fragments/layout :: sidebar(${tenant}, ${tenantSlug})}"></div>
+
+    <main class="content-area">
+        <div class="page-container">
+            <div class="card">
+                <h1>Payments</h1>
+                <p>Payment plan ve installment ekranları burada olacak.</p>
+            </div>
+        </div>
+    </main>
+</div>
+
+</body>
+</html>

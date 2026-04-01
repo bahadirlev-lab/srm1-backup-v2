@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${pageTitle}">Ürün Detayı</title>
+    <link rel="stylesheet" th:href="@{/css/public.css}">
+</head>
+<body>
+<div class="page-narrow">
+    <div class="header">
+        <h1 th:text="${product.name}">Ürün Adı</h1>
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="card">
+        <div class="price">
+            Fiyat: <span th:text="${product.priceText}">999,00 TL</span>
+        </div>
+
+        <div class="description" th:text="${product.detailDescription}">
+            Ürün açıklaması
+        </div>
+
+        <div class="actions">
+            <a class="button"
+               th:href="@{/site/products/{productCode}/checkout(productCode=${product.code})}">
+                Satın Al
+            </a>
+
+            <a class="button" th:href="@{/site}">
+                Geri Dön
+            </a>
+        </div>
+    </div>
+</div>
+</body>
+</html>
