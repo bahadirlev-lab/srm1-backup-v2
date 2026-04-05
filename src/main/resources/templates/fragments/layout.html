@@ -14,7 +14,10 @@
         <div class="sidebar-title" th:text="${tenant.name}">Tenant</div>
         <div class="sidebar-subtitle">Tenant Yönetimi</div>
 
-        <!-- 🔥 KULLANICI EMAIL -->
+        <div class="tenant-plan-box" th:if="${activeTermName != null}" style="margin-top:12px;">
+            <div><strong>Aktif Dönem:</strong> <span th:text="${activeTermName}">2026-2027</span></div>
+        </div>
+
         <div th:if="${sessionUsername != null}" class="user-box">
             <div class="user-label">Giriş yapan</div>
             <div class="user-email" th:text="${sessionUsername}">email</div>
@@ -30,9 +33,9 @@
 
         <nav class="menu">
             <a th:href="@{/{tenantSlug}(tenantSlug=${tenantSlug})}">Dashboard</a>
-            <a th:href="@{/{tenantSlug}/students(tenantSlug=${tenantSlug})}">Students</a>
+            <a th:href="@{/{tenantSlug}/students(tenantSlug=${tenantSlug})}">Öğrenciler</a>
             <a th:href="@{/{tenantSlug}/plans(tenantSlug=${tenantSlug})}">Planlar</a>
-            <a th:href="@{/{tenantSlug}/payments(tenantSlug=${tenantSlug})}">Payment</a>
+            <a th:href="@{/{tenantSlug}/payments(tenantSlug=${tenantSlug})}">Ödemeler</a>
             <a th:href="@{/{tenantSlug}/terms(tenantSlug=${tenantSlug})}">Dönemler</a>
             <a th:href="@{/{tenantSlug}/classrooms(tenantSlug=${tenantSlug})}">Sınıflar</a>
         </nav>

@@ -3,6 +3,7 @@ package com.botomosy.srm1.controller;
 import com.botomosy.srm1.domain.academic.Classroom;
 import com.botomosy.srm1.domain.tenant.Tenant;
 import com.botomosy.srm1.repository.ClassroomRepository;
+import com.botomosy.srm1.repository.StudentRepository;
 import com.botomosy.srm1.repository.TenantRepository;
 import com.botomosy.srm1.tenant.TenantContext;
 import org.springframework.stereotype.Controller;
@@ -10,7 +11,9 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 @Controller
 @RequestMapping("/{tenantSlug}/classrooms")
@@ -18,13 +21,16 @@ public class ClassroomController {
 
     private final TenantRepository tenantRepository;
     private final ClassroomRepository classroomRepository;
+    private final StudentRepository studentRepository;
 
     public ClassroomController(
             TenantRepository tenantRepository,
-            ClassroomRepository classroomRepository
+            ClassroomRepository classroomRepository,
+            StudentRepository studentRepository
     ) {
         this.tenantRepository = tenantRepository;
         this.classroomRepository = classroomRepository;
+        this.studentRepository = studentRepository;
     }
 
     @GetMapping
@@ -32,10 +38,20 @@ public class ClassroomController {
         Tenant tenant = resolveTenantOrThrow(tenantSlug);
         List<Classroom> classrooms = classroomRepository.findByTenantIdOrderByNameAsc(tenant.getId());
 
+        Map<Long, Long> classroomStudentCounts = new LinkedHashMap<>();
+        for (Classroom classroom : classrooms) {
+            long studentCount = studentRepository.countByTenantIdAndClassNameIgnoreCase(
+                    tenant.getId(),
+                    classroom.getName()
+            );
+            classroomStudentCounts.put(classroom.getId(), studentCount);
+        }
+
         model.addAttribute("tenant", tenant);
         model.addAttribute("tenantSlug", tenantSlug);
         model.addAttribute("pageTitle", "Sınıflar");
         model.addAttribute("classrooms", classrooms);
+        model.addAttribute("classroomStudentCounts", classroomStudentCounts);
 
         return "classrooms";
     }
@@ -80,6 +96,15 @@ public class ClassroomController {
 
         Classroom classroom = classroomRepository.findByIdAndTenantId(classroomId, tenant.getId())
                 .orElseThrow(() -> new IllegalArgumentException("Sınıf bulunamadı."));
+
+        long studentCount = studentRepository.countByTenantIdAndClassNameIgnoreCase(tenant.getId(), classroom.getName());
+        if (studentCount > 0) {
+            redirectAttributes.addFlashAttribute(
+                    "errorMessage",
+                    classroom.getName() + " sınıfına bağlı öğrenci olduğu için silinemez."
+            );
+            return "redirect:/" + tenantSlug + "/classrooms";
+        }
 
         classroomRepository.delete(classroom);
 

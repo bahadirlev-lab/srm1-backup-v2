@@ -17,6 +17,10 @@
                     Aktif Dönem: <strong th:text="${activeTermName}">2026-2027</strong>
                 </div>
 
+                <div class="alert alert-info">
+                    Toplam Dönem: <strong th:text="${#lists.size(terms)}">0</strong>
+                </div>
+
                 <div th:if="${successMessage != null}" class="alert alert-success" th:text="${successMessage}">
                     Başarılı
                 </div>
@@ -51,10 +55,11 @@
                         <td th:text="${term.name}">2026-2027</td>
                         <td th:text="${term.active ? 'Aktif' : 'Pasif'}">Aktif</td>
                         <td>
-                            <div style="display:flex; gap:8px; flex-wrap:wrap;">
+                            <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center;">
                                 <form th:if="${!term.active}"
                                       th:action="@{/{tenantSlug}/terms/{termId}/activate(tenantSlug=${tenantSlug}, termId=${term.id})}"
-                                      method="post">
+                                      method="post"
+                                      onsubmit="return confirm('Bu dönem aktif yapılsın mı?');">
                                     <button type="submit">Aktif Yap</button>
                                 </form>
 

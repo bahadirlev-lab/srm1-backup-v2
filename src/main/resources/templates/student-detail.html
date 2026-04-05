@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <th:block th:replace="~{fragments/layout :: head(${pageTitle})}"></th:block>
+</head>
+<body>
+
+<div class="app-shell">
+    <div th:replace="~{fragments/layout :: sidebar(${tenant}, ${tenantSlug})}"></div>
+
+    <main class="content-area">
+        <div class="page-container">
+
+            <div class="card">
+                <div style="display:flex; justify-content:space-between; gap:16px; flex-wrap:wrap; align-items:center;">
+                    <div>
+                        <h1 th:text="${student.name}">Öğrenci</h1>
+                        <div class="alert alert-info" style="margin-top:12px;">
+                            Kurum: <strong th:text="${tenant.name}">Kurum</strong>
+                        </div>
+                    </div>
+
+                    <div style="display:flex; gap:8px; flex-wrap:wrap;">
+                        <a class="button-link"
+                           th:href="@{/{tenantSlug}/students(tenantSlug=${tenantSlug})}">
+                            Listeye dön
+                        </a>
+
+                        <a class="button-link"
+                           th:href="@{/{tenantSlug}/students/{studentId}/edit(tenantSlug=${tenantSlug}, studentId=${student.id})}">
+                            Düzenle
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card" style="margin-top:20px;">
+                <h2>Öğrenci Kartı</h2>
+
+                <div class="stats-grid" style="margin-top:16px;">
+                    <div class="stat-card">
+                        <div>Ad Soyad</div>
+                        <strong th:text="${student.name}">Ad Soyad</strong>
+                    </div>
+
+                    <div class="stat-card">
+                        <div>Sınıfı</div>
+                        <strong th:text="${student.className}">12-A</strong>
+                    </div>
+
+                    <div class="stat-card">
+                        <div>Telefon</div>
+                        <strong th:text="${student.phone != null ? student.phone : '-'}">-</strong>
+                    </div>
+
+                    <div class="stat-card">
+                        <div>Durum</div>
+                        <strong th:text="${student.active ? 'Aktif' : 'Pasif'}">Aktif</strong>
+                    </div>
+
+                    <div class="stat-card">
+                        <div>Veli Adı</div>
+                        <strong th:text="${student.parentFirstName != null ? student.parentFirstName : '-'}">-</strong>
+                    </div>
+
+                    <div class="stat-card">
+                        <div>Veli Soyadı</div>
+                        <strong th:text="${student.parentLastName != null ? student.parentLastName : '-'}">-</strong>
+                    </div>
+
+                    <div class="stat-card">
+                        <div>Veli Telefonu</div>
+                        <strong th:text="${student.parentPhone != null ? student.parentPhone : '-'}">-</strong>
+                    </div>
+
+                    <div class="stat-card">
+                        <div>Telegram</div>
+                        <strong th:text="${student.telegramChatId != null ? student.telegramChatId : '-'}">-</strong>
+                    </div>
+
+                    <div class="stat-card">
+                        <div>Devamsızlık</div>
+                        <strong th:text="${student.absenceCount}">0</strong>
+                    </div>
+
+                    <div class="stat-card">
+                        <div>Aktif Dönem</div>
+                        <strong th:text="${activeTermName != null ? activeTermName : '-'}">2026-2027</strong>
+                    </div>
+
+                    <div class="stat-card">
+                        <div>Aktif Ödeme Planı</div>
+                        <strong th:text="${activePlan != null ? activePlan.planName : '-'}">-</strong>
+                    </div>
+
+                    <div class="stat-card">
+                        <div>Kalan Tutar</div>
+                        <strong th:text="${#numbers.formatDecimal(remainingAmount,1,'POINT',2,'COMMA')} + ' TL'">0,00 TL</strong>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card" style="margin-top:20px;">
+                <h2>Ödeme Özeti</h2>
+
+                <div class="stats-grid" style="margin-top:16px;">
+                    <div class="stat-card">
+                        <div>Toplam Beklenen</div>
+                        <strong th:text="${#numbers.formatDecimal(totalExpected,1,'POINT',2,'COMMA')} + ' TL'">0,00 TL</strong>
+                    </div>
+
+                    <div class="stat-card">
+                        <div>Toplam Tahsilat</div>
+                        <strong th:text="${#numbers.formatDecimal(totalPaid,1,'POINT',2,'COMMA')} + ' TL'">0,00 TL</strong>
+                    </div>
+
+                    <div class="stat-card">
+                        <div>Kalan</div>
+                        <strong th:text="${#numbers.formatDecimal(remainingAmount,1,'POINT',2,'COMMA')} + ' TL'">0,00 TL</strong>
+                    </div>
+
+                    <div class="stat-card">
+                        <div>Plan Sayısı</div>
+                        <strong th:text="${#lists.size(studentPlans)}">0</strong>
+                    </div>
+                </div>
+
+                <table style="margin-top:20px;">
+                    <tr>
+                        <th>Taksit</th>
+                        <th>Vade Tarihi</th>
+                        <th>Tutar</th>
+                        <th>Ödenen</th>
+                        <th>Durum</th>
+                    </tr>
+
+                    <tr th:if="${#lists.isEmpty(installments)}">
+                        <td colspan="5">Aktif ödeme planı bulunamadı.</td>
+                    </tr>
+
+                    <tr th:each="installment : ${installments}">
+                        <td th:text="${installment.installmentNo}">1</td>
+                        <td th:text="${installment.dueDate}">2026-01-01</td>
+                        <td th:text="${#numbers.formatDecimal(installment.amount,1,'POINT',2,'COMMA')} + ' TL'">0,00 TL</td>
+                        <td th:text="${#numbers.formatDecimal(installment.paidAmount,1,'POINT',2,'COMMA')} + ' TL'">0,00 TL</td>
+                        <td th:text="${installment.paid ? 'Ödendi' : 'Bekliyor'}">Bekliyor</td>
+                    </tr>
+                </table>
+            </div>
+
+            <div class="card" style="margin-top:20px;">
+                <h2>Sınav Sonuçları</h2>
+
+                <table style="margin-top:16px;">
+                    <tr>
+                        <th>Sınav</th>
+                        <th>Doğru</th>
+                        <th>Yanlış</th>
+                        <th>Net</th>
+                    </tr>
+
+                    <tr>
+                        <td>1. Sınav</td>
+                        <td th:text="${student.exam1Correct != null ? student.exam1Correct : '-'}">-</td>
+                        <td th:text="${student.exam1Wrong != null ? student.exam1Wrong : '-'}">-</td>
+                        <td th:text="${student.exam1Net != null ? student.exam1Net : '-'}">-</td>
+                    </tr>
+                    <tr>
+                        <td>2. Sınav</td>
+                        <td th:text="${student.exam2Correct != null ? student.exam2Correct : '-'}">-</td>
+                        <td th:text="${student.exam2Wrong != null ? student.exam2Wrong : '-'}">-</td>
+                        <td th:text="${student.exam2Net != null ? student.exam2Net : '-'}">-</td>
+                    </tr>
+                    <tr>
+                        <td>3. Sınav</td>
+                        <td th:text="${student.exam3Correct != null ? student.exam3Correct : '-'}">-</td>
+                        <td th:text="${student.exam3Wrong != null ? student.exam3Wrong : '-'}">-</td>
+                        <td th:text="${student.exam3Net != null ? student.exam3Net : '-'}">-</td>
+                    </tr>
+                    <tr>
+                        <td>4. Sınav</td>
+                        <td th:text="${student.exam4Correct != null ? student.exam4Correct : '-'}">-</td>
+                        <td th:text="${student.exam4Wrong != null ? student.exam4Wrong : '-'}">-</td>
+                        <td th:text="${student.exam4Net != null ? student.exam4Net : '-'}">-</td>
+                    </tr>
+                    <tr>
+                        <td>5. Sınav</td>
+                        <td th:text="${student.exam5Correct != null ? student.exam5Correct : '-'}">-</td>
+                        <td th:text="${student.exam5Wrong != null ? student.exam5Wrong : '-'}">-</td>
+                        <td th:text="${student.exam5Net != null ? student.exam5Net : '-'}">-</td>
+                    </tr>
+                    <tr>
+                        <td>6. Sınav</td>
+                        <td th:text="${student.exam6Correct != null ? student.exam6Correct : '-'}">-</td>
+                        <td th:text="${student.exam6Wrong != null ? student.exam6Wrong : '-'}">-</td>
+                        <td th:text="${student.exam6Net != null ? student.exam6Net : '-'}">-</td>
+                    </tr>
+                    <tr>
+                        <td>7. Sınav</td>
+                        <td th:text="${student.exam7Correct != null ? student.exam7Correct : '-'}">-</td>
+                        <td th:text="${student.exam7Wrong != null ? student.exam7Wrong : '-'}">-</td>
+                        <td th:text="${student.exam7Net != null ? student.exam7Net : '-'}">-</td>
+                    </tr>
+                    <tr>
+                        <td>8. Sınav</td>
+                        <td th:text="${student.exam8Correct != null ? student.exam8Correct : '-'}">-</td>
+                        <td th:text="${student.exam8Wrong != null ? student.exam8Wrong : '-'}">-</td>
+                        <td th:text="${student.exam8Net != null ? student.exam8Net : '-'}">-</td>
+                    </tr>
+                    <tr>
+                        <td>9. Sınav</td>
+                        <td th:text="${student.exam9Correct != null ? student.exam9Correct : '-'}">-</td>
+                        <td th:text="${student.exam9Wrong != null ? student.exam9Wrong : '-'}">-</td>
+                        <td th:text="${student.exam9Net != null ? student.exam9Net : '-'}">-</td>
+                    </tr>
+                    <tr>
+                        <td>10. Sınav</td>
+                        <td th:text="${student.exam10Correct != null ? student.exam10Correct : '-'}">-</td>
+                        <td th:text="${student.exam10Wrong != null ? student.exam10Wrong : '-'}">-</td>
+                        <td th:text="${student.exam10Net != null ? student.exam10Net : '-'}">-</td>
+                    </tr>
+                </table>
+            </div>
+
+        </div>
+    </main>
+</div>
+
+</body>
+</html>

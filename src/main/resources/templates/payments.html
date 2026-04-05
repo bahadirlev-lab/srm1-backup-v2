@@ -76,9 +76,19 @@
                         <td th:text="${#numbers.formatDecimal(p.totalAmount,0,'POINT',0,'POINT')} + ' TL'"></td>
                         <td th:text="${p.installmentCount}"></td>
                         <td>
-                            <a th:href="@{/{tenantSlug}/payments(tenantSlug=${tenantSlug}, planId=${p.id})}">
-                                Taksitleri Göster
-                            </a>
+                            <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
+                                <a th:href="@{/{tenantSlug}/payments(tenantSlug=${tenantSlug}, planId=${p.id})}">
+                                    Taksitleri Göster
+                                </a>
+
+                                <form th:action="@{/{tenantSlug}/payments/delete-plan(tenantSlug=${tenantSlug})}"
+                                      method="post"
+                                      onsubmit="return confirm('Bu ödeme planını silmek istiyor musunuz? Bu işlem planın tüm taksitlerini de silecektir.');"
+                                      style="display:inline;">
+                                    <input type="hidden" name="planId" th:value="${p.id}">
+                                    <button type="submit">Sil</button>
+                                </form>
+                            </div>
                         </td>
                     </tr>
                 </table>

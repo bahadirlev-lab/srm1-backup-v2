@@ -38,17 +38,19 @@
                     <tr>
                         <th>ID</th>
                         <th>Sınıf Adı</th>
+                        <th>Öğrenci Sayısı</th>
                         <th>Durum</th>
                         <th>İşlem</th>
                     </tr>
 
                     <tr th:if="${#lists.isEmpty(classrooms)}">
-                        <td colspan="4">Henüz sınıf yok.</td>
+                        <td colspan="5">Henüz sınıf yok.</td>
                     </tr>
 
                     <tr th:each="classroom : ${classrooms}">
                         <td th:text="${classroom.id}">1</td>
                         <td th:text="${classroom.name}">12-A</td>
+                        <td th:text="${classroomStudentCounts[classroom.id]}">0</td>
                         <td th:text="${classroom.active ? 'Aktif' : 'Pasif'}">Aktif</td>
                         <td>
                             <form th:action="@{/{tenantSlug}/classrooms/{classroomId}/delete(tenantSlug=${tenantSlug}, classroomId=${classroom.id})}"

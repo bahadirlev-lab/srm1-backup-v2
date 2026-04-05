@@ -1,9 +1,11 @@
 package com.botomosy.srm1.controller;
 
+import com.botomosy.srm1.domain.academic.Classroom;
 import com.botomosy.srm1.domain.payment.Installment;
 import com.botomosy.srm1.domain.payment.PaymentPlan;
 import com.botomosy.srm1.domain.student.Student;
 import com.botomosy.srm1.domain.tenant.Tenant;
+import com.botomosy.srm1.repository.ClassroomRepository;
 import com.botomosy.srm1.repository.InstallmentRepository;
 import com.botomosy.srm1.repository.PaymentPlanRepository;
 import com.botomosy.srm1.repository.StudentRepository;
@@ -16,8 +18,8 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.math.BigDecimal;
+import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
 
 @Controller
 @RequestMapping("/{tenantSlug}/students")
@@ -28,67 +30,29 @@ public class StudentController {
     private final TenantPlanService tenantPlanService;
     private final PaymentPlanRepository paymentPlanRepository;
     private final InstallmentRepository installmentRepository;
+    private final ClassroomRepository classroomRepository;
 
     public StudentController(
             StudentRepository studentRepository,
             TenantRepository tenantRepository,
             TenantPlanService tenantPlanService,
             PaymentPlanRepository paymentPlanRepository,
-            InstallmentRepository installmentRepository
+            InstallmentRepository installmentRepository,
+            ClassroomRepository classroomRepository
     ) {
         this.studentRepository = studentRepository;
         this.tenantRepository = tenantRepository;
         this.tenantPlanService = tenantPlanService;
         this.paymentPlanRepository = paymentPlanRepository;
         this.installmentRepository = installmentRepository;
+        this.classroomRepository = classroomRepository;
     }
 
     @GetMapping
-    public String list(
-            @PathVariable String tenantSlug,
-            @RequestParam(required = false) Long studentId,
-            Model model
-    ) {
+    public String list(@PathVariable String tenantSlug, Model model) {
         Tenant tenant = resolveTenantOrThrow(tenantSlug);
         List<Student> students = studentRepository.findByTenantId(tenant.getId());
         long studentCount = studentRepository.countByTenantId(tenant.getId());
-
-        Student selectedStudent = null;
-        PaymentPlan selectedStudentPlan = null;
-        List<Installment> selectedStudentInstallments = List.of();
-        BigDecimal selectedStudentTotalAmount = BigDecimal.ZERO;
-        BigDecimal selectedStudentTotalPaid = BigDecimal.ZERO;
-        BigDecimal selectedStudentRemainingAmount = BigDecimal.ZERO;
-
-        if (studentId != null) {
-            selectedStudent = studentRepository.findByIdAndTenantId(studentId, tenant.getId()).orElse(null);
-
-            if (selectedStudent != null) {
-                Optional<PaymentPlan> optionalPlan = paymentPlanRepository
-                        .findFirstByTenantIdAndStudentIdAndActiveTrueOrderByIdDesc(tenant.getId(), selectedStudent.getId());
-
-                if (optionalPlan.isPresent()) {
-                    selectedStudentPlan = optionalPlan.get();
-                    selectedStudentInstallments = installmentRepository
-                            .findByPaymentPlanIdAndTenantIdOrderByInstallmentNoAsc(selectedStudentPlan.getId(), tenant.getId());
-
-                    for (Installment installment : selectedStudentInstallments) {
-                        if (installment.getAmount() != null) {
-                            selectedStudentTotalAmount = selectedStudentTotalAmount.add(installment.getAmount());
-                        }
-
-                        if (installment.getPaidAmount() != null) {
-                            selectedStudentTotalPaid = selectedStudentTotalPaid.add(installment.getPaidAmount());
-                        }
-                    }
-
-                    selectedStudentRemainingAmount = selectedStudentTotalAmount.subtract(selectedStudentTotalPaid);
-                    if (selectedStudentRemainingAmount.compareTo(BigDecimal.ZERO) < 0) {
-                        selectedStudentRemainingAmount = BigDecimal.ZERO;
-                    }
-                }
-            }
-        }
 
         model.addAttribute("tenant", tenant);
         model.addAttribute("tenantSlug", tenantSlug);
@@ -97,12 +61,6 @@ public class StudentController {
         model.addAttribute("studentCount", studentCount);
         model.addAttribute("studentLimit", tenant.getStudentLimit());
         model.addAttribute("limitReached", !tenantPlanService.canAddStudent(tenant, studentCount));
-        model.addAttribute("selectedStudent", selectedStudent);
-        model.addAttribute("selectedStudentPlan", selectedStudentPlan);
-        model.addAttribute("selectedStudentInstallments", selectedStudentInstallments);
-        model.addAttribute("selectedStudentTotalAmount", selectedStudentTotalAmount);
-        model.addAttribute("selectedStudentTotalPaid", selectedStudentTotalPaid);
-        model.addAttribute("selectedStudentRemainingAmount", selectedStudentRemainingAmount);
 
         return "students";
     }
@@ -130,11 +88,14 @@ public class StudentController {
             model.addAttribute("student", student);
         }
 
+        List<Classroom> classrooms = classroomRepository.findByTenantIdOrderByNameAsc(tenant.getId());
+
         model.addAttribute("tenant", tenant);
         model.addAttribute("tenantSlug", tenantSlug);
         model.addAttribute("pageTitle", "Yeni Öğrenci");
         model.addAttribute("formAction", "/" + tenantSlug + "/students");
         model.addAttribute("formTitle", "Yeni Öğrenci");
+        model.addAttribute("classrooms", classrooms);
 
         return "student-form";
     }
@@ -153,7 +114,7 @@ public class StudentController {
             return "redirect:/" + tenantSlug + "/students";
         }
 
-        String validationError = validateStudent(student);
+        String validationError = validateStudent(student, tenant);
         if (validationError != null) {
             redirectAttributes.addFlashAttribute("errorMessage", validationError);
             redirectAttributes.addFlashAttribute("student", student);
@@ -165,7 +126,63 @@ public class StudentController {
         student = studentRepository.save(student);
 
         redirectAttributes.addFlashAttribute("successMessage", "Öğrenci başarıyla eklendi.");
-        return "redirect:/" + tenantSlug + "/students?studentId=" + student.getId();
+        return "redirect:/" + tenantSlug + "/students/" + student.getId();
+    }
+
+    @GetMapping("/{studentId}")
+    public String detail(
+            @PathVariable String tenantSlug,
+            @PathVariable Long studentId,
+            Model model
+    ) {
+        Tenant tenant = resolveTenantOrThrow(tenantSlug);
+
+        Student student = studentRepository.findByIdAndTenantId(studentId, tenant.getId())
+                .orElseThrow(() -> new IllegalArgumentException("Öğrenci bulunamadı: " + studentId));
+
+        List<PaymentPlan> studentPlans = paymentPlanRepository.findByTenantIdOrderByIdDesc(tenant.getId())
+                .stream()
+                .filter(plan -> plan.getStudent() != null && plan.getStudent().getId().equals(student.getId()))
+                .toList();
+
+        PaymentPlan activePlan = studentPlans.stream()
+                .filter(PaymentPlan::isActive)
+                .findFirst()
+                .orElse(studentPlans.isEmpty() ? null : studentPlans.get(0));
+
+        List<Installment> installments = activePlan == null
+                ? Collections.emptyList()
+                : installmentRepository.findByPaymentPlanIdAndTenantIdOrderByInstallmentNoAsc(activePlan.getId(), tenant.getId());
+
+        BigDecimal totalExpected = BigDecimal.ZERO;
+        BigDecimal totalPaid = BigDecimal.ZERO;
+
+        for (Installment installment : installments) {
+            if (installment.getAmount() != null) {
+                totalExpected = totalExpected.add(installment.getAmount());
+            }
+            if (installment.getPaidAmount() != null) {
+                totalPaid = totalPaid.add(installment.getPaidAmount());
+            }
+        }
+
+        BigDecimal remainingAmount = totalExpected.subtract(totalPaid);
+        if (remainingAmount.compareTo(BigDecimal.ZERO) < 0) {
+            remainingAmount = BigDecimal.ZERO;
+        }
+
+        model.addAttribute("tenant", tenant);
+        model.addAttribute("tenantSlug", tenantSlug);
+        model.addAttribute("pageTitle", student.getName());
+        model.addAttribute("student", student);
+        model.addAttribute("activePlan", activePlan);
+        model.addAttribute("studentPlans", studentPlans);
+        model.addAttribute("installments", installments);
+        model.addAttribute("totalExpected", totalExpected);
+        model.addAttribute("totalPaid", totalPaid);
+        model.addAttribute("remainingAmount", remainingAmount);
+
+        return "student-detail";
     }
 
     @GetMapping("/{studentId}/edit")
@@ -179,12 +196,15 @@ public class StudentController {
         Student student = studentRepository.findByIdAndTenantId(studentId, tenant.getId())
                 .orElseThrow(() -> new IllegalArgumentException("Öğrenci bulunamadı: " + studentId));
 
+        List<Classroom> classrooms = classroomRepository.findByTenantIdOrderByNameAsc(tenant.getId());
+
         model.addAttribute("tenant", tenant);
         model.addAttribute("tenantSlug", tenantSlug);
         model.addAttribute("pageTitle", "Öğrenci Düzenle");
         model.addAttribute("formAction", "/" + tenantSlug + "/students/" + student.getId() + "/edit");
         model.addAttribute("formTitle", "Öğrenci Düzenle");
         model.addAttribute("student", student);
+        model.addAttribute("classrooms", classrooms);
 
         return "student-form";
     }
@@ -201,7 +221,7 @@ public class StudentController {
         Student existingStudent = studentRepository.findByIdAndTenantId(studentId, tenant.getId())
                 .orElseThrow(() -> new IllegalArgumentException("Öğrenci bulunamadı: " + studentId));
 
-        String validationError = validateStudent(formStudent);
+        String validationError = validateStudent(formStudent, tenant);
         if (validationError != null) {
             redirectAttributes.addFlashAttribute("errorMessage", validationError);
             return "redirect:/" + tenantSlug + "/students/" + studentId + "/edit";
@@ -252,7 +272,7 @@ public class StudentController {
         studentRepository.save(existingStudent);
 
         redirectAttributes.addFlashAttribute("successMessage", "Öğrenci güncellendi.");
-        return "redirect:/" + tenantSlug + "/students?studentId=" + existingStudent.getId();
+        return "redirect:/" + tenantSlug + "/students/" + existingStudent.getId();
     }
 
     @PostMapping("/{studentId}/delete")
@@ -266,17 +286,9 @@ public class StudentController {
         Student student = studentRepository.findByIdAndTenantId(studentId, tenant.getId())
                 .orElseThrow(() -> new IllegalArgumentException("Öğrenci bulunamadı: " + studentId));
 
-        if (paymentPlanRepository.existsByTenantIdAndStudentId(tenant.getId(), studentId)) {
-            redirectAttributes.addFlashAttribute(
-                    "errorMessage",
-                    student.getName() + " silinemedi. Bu öğrenciye bağlı ödeme planı bulunduğu için önce ödeme kayıtlarını temizlemelisin."
-            );
-            return "redirect:/" + tenantSlug + "/students?studentId=" + studentId;
-        }
-
         studentRepository.delete(student);
 
-        redirectAttributes.addFlashAttribute("successMessage", "Öğrenci silindi. Limit tekrar güncellendi.");
+        redirectAttributes.addFlashAttribute("successMessage", "Öğrenci silindi.");
         return "redirect:/" + tenantSlug + "/students";
     }
 
@@ -293,7 +305,7 @@ public class StudentController {
         student.setAbsenceCount(student.getAbsenceCount());
     }
 
-    private String validateStudent(Student student) {
+    private String validateStudent(Student student, Tenant tenant) {
         if (student.getFirstName() == null || student.getFirstName().trim().isBlank()) {
             return "Ad alanı zorunludur.";
         }
@@ -304,6 +316,10 @@ public class StudentController {
 
         if (student.getClassName() == null || student.getClassName().trim().isBlank()) {
             return "Sınıf alanı zorunludur.";
+        }
+
+        if (!classroomRepository.existsByTenantIdAndNameIgnoreCase(tenant.getId(), student.getClassName().trim())) {
+            return "Geçerli bir sınıf seçmelisiniz.";
         }
 
         if (student.getAbsenceCount() < 0) {

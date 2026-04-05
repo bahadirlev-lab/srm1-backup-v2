@@ -12,6 +12,8 @@ public interface AppUserRepository extends JpaRepository<AppUser, Long> {
 
     List<AppUser> findAllByUsernameAndActiveTrue(String username);
 
+    List<AppUser> findByActiveTrueOrderByIdDesc();
+
     boolean existsByTenantIdAndUsername(Long tenantId, String username);
 
     List<AppUser> findByTenantIdOrderByIdAsc(Long tenantId);

@@ -24,7 +24,12 @@
                     Hata
                 </div>
 
-                <form th:action="${formAction}" method="post" th:object="${student}">
+                <div th:if="${#lists.isEmpty(classrooms)}" class="alert alert-info">
+                    Önce sınıf oluşturmalısınız.
+                    <a th:href="@{/{tenantSlug}/classrooms(tenantSlug=${tenantSlug})}">Sınıflara git</a>
+                </div>
+
+                <form th:if="${!#lists.isEmpty(classrooms)}" th:action="${formAction}" method="post" th:object="${student}">
                     <div class="field">
                         <label>Ad *</label>
                         <input type="text" th:field="*{firstName}" required>
@@ -37,7 +42,14 @@
 
                     <div class="field">
                         <label>Sınıfı *</label>
-                        <input type="text" th:field="*{className}" required>
+                        <select th:field="*{className}" required>
+                            <option value="">Sınıf seç</option>
+                            <option th:each="classroom : ${classrooms}"
+                                    th:value="${classroom.name}"
+                                    th:text="${classroom.name}">
+                                12-A
+                            </option>
+                        </select>
                     </div>
 
                     <div class="field">
