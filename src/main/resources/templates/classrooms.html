@@ -12,7 +12,53 @@
         <div class="page-container">
             <div class="card">
                 <h1>Sınıflar</h1>
-                <p>Sınıf yönetimi ekranı burada olacak.</p>
+
+                <div class="alert alert-info" th:if="${activeTermName != null}">
+                    Aktif Dönem: <strong th:text="${activeTermName}">2026-2027</strong>
+                </div>
+
+                <div th:if="${successMessage != null}" class="alert alert-success" th:text="${successMessage}">
+                    Başarılı
+                </div>
+
+                <div th:if="${errorMessage != null}" class="alert alert-error" th:text="${errorMessage}">
+                    Hata
+                </div>
+
+                <form th:action="@{/{tenantSlug}/classrooms(tenantSlug=${tenantSlug})}" method="post" style="margin-bottom:20px;">
+                    <div class="field">
+                        <label>Sınıf Adı</label>
+                        <input type="text" name="name" placeholder="Örn: 12-A" required>
+                    </div>
+
+                    <button type="submit">Sınıf Oluştur</button>
+                </form>
+
+                <table>
+                    <tr>
+                        <th>ID</th>
+                        <th>Sınıf Adı</th>
+                        <th>Durum</th>
+                        <th>İşlem</th>
+                    </tr>
+
+                    <tr th:if="${#lists.isEmpty(classrooms)}">
+                        <td colspan="4">Henüz sınıf yok.</td>
+                    </tr>
+
+                    <tr th:each="classroom : ${classrooms}">
+                        <td th:text="${classroom.id}">1</td>
+                        <td th:text="${classroom.name}">12-A</td>
+                        <td th:text="${classroom.active ? 'Aktif' : 'Pasif'}">Aktif</td>
+                        <td>
+                            <form th:action="@{/{tenantSlug}/classrooms/{classroomId}/delete(tenantSlug=${tenantSlug}, classroomId=${classroom.id})}"
+                                  method="post"
+                                  onsubmit="return confirm('Bu sınıfı silmek istiyor musunuz?');">
+                                <button type="submit">Sil</button>
+                            </form>
+                        </td>
+                    </tr>
+                </table>
             </div>
         </div>
     </main>

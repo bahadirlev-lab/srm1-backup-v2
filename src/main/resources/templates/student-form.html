@@ -11,7 +11,7 @@
     <main class="content-area">
         <div class="page-container">
             <div class="card">
-                <h1>Yeni Student</h1>
+                <h1 th:text="${formTitle}">Öğrenci</h1>
 
                 <p>
                     <a class="button-link"
@@ -24,10 +24,20 @@
                     Hata
                 </div>
 
-                <form th:action="@{/{tenantSlug}/students(tenantSlug=${tenantSlug})}" method="post" th:object="${student}">
+                <form th:action="${formAction}" method="post" th:object="${student}">
                     <div class="field">
-                        <label>Ad</label>
-                        <input type="text" th:field="*{name}">
+                        <label>Ad *</label>
+                        <input type="text" th:field="*{firstName}" required>
+                    </div>
+
+                    <div class="field">
+                        <label>Soyad *</label>
+                        <input type="text" th:field="*{lastName}" required>
+                    </div>
+
+                    <div class="field">
+                        <label>Sınıfı *</label>
+                        <input type="text" th:field="*{className}" required>
                     </div>
 
                     <div class="field">
@@ -36,10 +46,175 @@
                     </div>
 
                     <div class="field">
+                        <label>Veli Adı</label>
+                        <input type="text" th:field="*{parentFirstName}">
+                    </div>
+
+                    <div class="field">
+                        <label>Veli Soyadı</label>
+                        <input type="text" th:field="*{parentLastName}">
+                    </div>
+
+                    <div class="field">
+                        <label>Veli Telefonu</label>
+                        <input type="text" th:field="*{parentPhone}">
+                    </div>
+
+                    <div class="field">
+                        <label>Telegram Chat ID</label>
+                        <input type="text" th:field="*{telegramChatId}">
+                    </div>
+
+                    <div class="field">
+                        <label>Devamsızlık</label>
+                        <input type="number" min="0" th:field="*{absenceCount}">
+                    </div>
+
+                    <div class="field">
                         <label>
                             <input type="checkbox" th:field="*{active}">
                             Aktif
                         </label>
+                    </div>
+
+                    <h3>1. Sınav</h3>
+                    <div class="field">
+                        <label>Doğru</label>
+                        <input type="number" step="0.01" th:field="*{exam1Correct}">
+                    </div>
+                    <div class="field">
+                        <label>Yanlış</label>
+                        <input type="number" step="0.01" th:field="*{exam1Wrong}">
+                    </div>
+                    <div class="field">
+                        <label>Net</label>
+                        <input type="number" step="0.01" th:field="*{exam1Net}">
+                    </div>
+
+                    <h3>2. Sınav</h3>
+                    <div class="field">
+                        <label>Doğru</label>
+                        <input type="number" step="0.01" th:field="*{exam2Correct}">
+                    </div>
+                    <div class="field">
+                        <label>Yanlış</label>
+                        <input type="number" step="0.01" th:field="*{exam2Wrong}">
+                    </div>
+                    <div class="field">
+                        <label>Net</label>
+                        <input type="number" step="0.01" th:field="*{exam2Net}">
+                    </div>
+
+                    <h3>3. Sınav</h3>
+                    <div class="field">
+                        <label>Doğru</label>
+                        <input type="number" step="0.01" th:field="*{exam3Correct}">
+                    </div>
+                    <div class="field">
+                        <label>Yanlış</label>
+                        <input type="number" step="0.01" th:field="*{exam3Wrong}">
+                    </div>
+                    <div class="field">
+                        <label>Net</label>
+                        <input type="number" step="0.01" th:field="*{exam3Net}">
+                    </div>
+
+                    <h3>4. Sınav</h3>
+                    <div class="field">
+                        <label>Doğru</label>
+                        <input type="number" step="0.01" th:field="*{exam4Correct}">
+                    </div>
+                    <div class="field">
+                        <label>Yanlış</label>
+                        <input type="number" step="0.01" th:field="*{exam4Wrong}">
+                    </div>
+                    <div class="field">
+                        <label>Net</label>
+                        <input type="number" step="0.01" th:field="*{exam4Net}">
+                    </div>
+
+                    <h3>5. Sınav</h3>
+                    <div class="field">
+                        <label>Doğru</label>
+                        <input type="number" step="0.01" th:field="*{exam5Correct}">
+                    </div>
+                    <div class="field">
+                        <label>Yanlış</label>
+                        <input type="number" step="0.01" th:field="*{exam5Wrong}">
+                    </div>
+                    <div class="field">
+                        <label>Net</label>
+                        <input type="number" step="0.01" th:field="*{exam5Net}">
+                    </div>
+
+                    <h3>6. Sınav</h3>
+                    <div class="field">
+                        <label>Doğru</label>
+                        <input type="number" step="0.01" th:field="*{exam6Correct}">
+                    </div>
+                    <div class="field">
+                        <label>Yanlış</label>
+                        <input type="number" step="0.01" th:field="*{exam6Wrong}">
+                    </div>
+                    <div class="field">
+                        <label>Net</label>
+                        <input type="number" step="0.01" th:field="*{exam6Net}">
+                    </div>
+
+                    <h3>7. Sınav</h3>
+                    <div class="field">
+                        <label>Doğru</label>
+                        <input type="number" step="0.01" th:field="*{exam7Correct}">
+                    </div>
+                    <div class="field">
+                        <label>Yanlış</label>
+                        <input type="number" step="0.01" th:field="*{exam7Wrong}">
+                    </div>
+                    <div class="field">
+                        <label>Net</label>
+                        <input type="number" step="0.01" th:field="*{exam7Net}">
+                    </div>
+
+                    <h3>8. Sınav</h3>
+                    <div class="field">
+                        <label>Doğru</label>
+                        <input type="number" step="0.01" th:field="*{exam8Correct}">
+                    </div>
+                    <div class="field">
+                        <label>Yanlış</label>
+                        <input type="number" step="0.01" th:field="*{exam8Wrong}">
+                    </div>
+                    <div class="field">
+                        <label>Net</label>
+                        <input type="number" step="0.01" th:field="*{exam8Net}">
+                    </div>
+
+                    <h3>9. Sınav</h3>
+                    <div class="field">
+                        <label>Doğru</label>
+                        <input type="number" step="0.01" th:field="*{exam9Correct}">
+                    </div>
+                    <div class="field">
+                        <label>Yanlış</label>
+                        <input type="number" step="0.01" th:field="*{exam9Wrong}">
+                    </div>
+                    <div class="field">
+                        <label>Net</label>
+                        <input type="number" step="0.01" th:field="*{exam9Net}">
+                    </div>
+
+                    <h3>10. Sınav</h3>
+                    <div class="field">
+                        <label>Doğru</label>
+                        <input type="number" step="0.01" th:field="*{exam10Correct}">
+                    </div>
+                    <div class="field">
+                        <label>Yanlış</label>
+                        <input type="number" step="0.01" th:field="*{exam10Wrong}">
+                    </div>
+                    <div class="field">
+                        <label>Net</label>
+                        <input type="number" step="0.01" th:field="*{exam10Net}">
                     </div>
 
                     <button type="submit">Kaydet</button>

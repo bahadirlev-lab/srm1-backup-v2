@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
-    <th:block th:replace="~{fragments/layout :: head(${pageTitle})}"></th:block>
+    <th:block th:replace="~{fragments/layout :: head('Payments')}"></th:block>
 </head>
 <body>
 
@@ -10,10 +10,159 @@
 
     <main class="content-area">
         <div class="page-container">
+
             <div class="card">
-                <h1>Payments</h1>
-                <p>Payment plan ve installment ekranları burada olacak.</p>
+                <h2>Payment</h2>
+
+                <div th:if="${errorMessage != null}" class="alert alert-error" th:text="${errorMessage}">
+                    Hata
+                </div>
+
+                <div th:if="${successMessage != null}" class="alert alert-success" th:text="${successMessage}">
+                    Başarılı
+                </div>
+
+                <div th:if="${selectedStudent != null}" style="margin-top: 12px; font-size: 22px; font-weight: 700;">
+                    <span th:text="${selectedStudent.name}"></span>
+                </div>
+
+                <form th:action="@{/{tenantSlug}/payments/create-plan(tenantSlug=${tenantSlug})}" method="post" style="margin-top: 20px;">
+                    <div class="field">
+                        <label>Öğrenci</label>
+                        <select name="studentId" required>
+                            <option value="">Öğrenci seç</option>
+                            <option th:each="s : ${students}" th:value="${s.id}" th:text="${s.name}"></option>
+                        </select>
+                    </div>
+
+                    <div class="field">
+                        <label>Toplam Kurs Ücreti</label>
+                        <input type="number" name="totalAmount" step="0.01" min="0" required>
+                    </div>
+
+                    <div class="field">
+                        <label>Taksit Sayısı</label>
+                        <input type="number" name="installmentCount" min="1" required>
+                    </div>
+
+                    <div class="field">
+                        <label>Ödeme Günü</label>
+                        <input type="date" name="startDate" required>
+                    </div>
+
+                    <button type="submit">Plan Oluştur</button>
+                </form>
             </div>
+
+            <div class="card" style="margin-top: 20px;">
+                <h3>Oluşturulan Planlar</h3>
+
+                <table>
+                    <tr>
+                        <th>Öğrenci</th>
+                        <th>Plan</th>
+                        <th>Toplam Tutar</th>
+                        <th>Taksit</th>
+                        <th>İşlem</th>
+                    </tr>
+
+                    <tr th:if="${#lists.isEmpty(plans)}">
+                        <td colspan="5">Henüz ödeme planı yok.</td>
+                    </tr>
+
+                    <tr th:each="p : ${plans}">
+                        <td th:text="${p.student.name}"></td>
+                        <td th:text="${p.planName}"></td>
+                        <td th:text="${#numbers.formatDecimal(p.totalAmount,0,'POINT',0,'POINT')} + ' TL'"></td>
+                        <td th:text="${p.installmentCount}"></td>
+                        <td>
+                            <a th:href="@{/{tenantSlug}/payments(tenantSlug=${tenantSlug}, planId=${p.id})}">
+                                Taksitleri Göster
+                            </a>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+
+            <div class="card" style="margin-top:20px;" th:if="${selectedPlan != null}">
+                <h3>Manuel Ödeme</h3>
+
+                <form th:action="@{/{tenantSlug}/payments/manual-payment(tenantSlug=${tenantSlug})}"
+                      method="post"
+                      onsubmit="return confirm('Ödeme dağıtılsın mı?');">
+
+                    <input type="hidden" name="planId" th:value="${selectedPlan.id}">
+
+                    <input type="number" name="amount" placeholder="Ödeme tutarı">
+
+                    <button type="submit">Dağıt</button>
+                </form>
+            </div>
+
+            <div class="card" style="margin-top: 20px;" th:if="${selectedPlan != null}">
+                <h3>Taksitler</h3>
+
+                <table>
+                    <tr>
+                        <th>No</th>
+                        <th>Vade</th>
+                        <th>Tutar</th>
+                        <th>Durum</th>
+                        <th>İşlem</th>
+                    </tr>
+
+                    <tr th:if="${#lists.isEmpty(installments)}">
+                        <td colspan="5">Bu plana ait taksit yok.</td>
+                    </tr>
+
+                    <tr th:each="i : ${installments}">
+                        <td th:text="${i.installmentNo}"></td>
+
+                        <td th:text="${i.dueDate}"></td>
+
+                        <td>
+                            <form th:action="@{/{tenantSlug}/payments/update-installment(tenantSlug=${tenantSlug})}"
+                                  method="post"
+                                  style="display:flex; gap:5px;">
+                                <input type="hidden" name="installmentId" th:value="${i.id}">
+                                <input type="number"
+                                       name="amount"
+                                       th:value="${i.amount}"
+                                       style="width:90px;">
+                                <button type="submit">Kaydet</button>
+                            </form>
+
+                            <div style="font-size:12px; color:gray;">
+                                Ödenen:
+                                <span th:text="${#numbers.formatDecimal(i.paidAmount,0,'POINT',0,'POINT')}"></span>
+                            </div>
+                        </td>
+
+                        <td th:text="${i.paid ? 'Ödendi' : 'Bekliyor'}"></td>
+
+                        <td>
+                            <form th:if="${!i.paid}"
+                                  th:action="@{/{tenantSlug}/payments/pay-installment(tenantSlug=${tenantSlug})}"
+                                  method="post"
+                                  onsubmit="return confirm('Ödeme alınsın mı?');"
+                                  style="display:inline;">
+                                <input type="hidden" name="installmentId" th:value="${i.id}">
+                                <button type="submit">Öde</button>
+                            </form>
+
+                            <form th:if="${i.paid}"
+                                  th:action="@{/{tenantSlug}/payments/undo-payment(tenantSlug=${tenantSlug})}"
+                                  method="post"
+                                  onsubmit="return confirm('Ödeme geri alınsın mı?');"
+                                  style="display:inline;">
+                                <input type="hidden" name="installmentId" th:value="${i.id}">
+                                <button type="submit">Geri Al</button>
+                            </form>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+
         </div>
     </main>
 </div>

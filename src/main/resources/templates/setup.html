@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <th:block th:replace="~{fragments/layout :: head(${pageTitle})}"></th:block>
+</head>
+<body>
+
+<div class="app-shell">
+
+    <aside class="sidebar">
+        <div class="sidebar-title" th:text="${tenant.name}">Tenant</div>
+        <div class="sidebar-subtitle">Hesap Oluştur</div>
+    </aside>
+
+    <main class="content-area">
+        <div class="page-container">
+            <div class="card" style="max-width: 520px;">
+
+                <h1>Hesabınızı Oluşturun</h1>
+
+                <p class="muted">
+                    Kurumunuz oluşturuldu. Devam etmek için yönetici hesabınızı oluşturun.
+                </p>
+
+                <!-- 🔥 KURUM ADI GÖSTER -->
+                <p class="muted">
+                    Kurum: <strong th:text="${tenant.name}"></strong>
+                </p>
+
+                <div th:if="${errorMessage}" class="alert alert-error" th:text="${errorMessage}"></div>
+
+                <form th:action="@{/{tenantSlug}/setup(tenantSlug=${tenantSlug})}" method="post">
+
+                    <div class="field">
+                        <label>Email</label>
+                        <input type="email" name="email" required>
+                    </div>
+
+                    <div class="field">
+                        <label>Şifre</label>
+                        <input type="password" name="password" required>
+                    </div>
+
+                    <button type="submit">Hesap Oluştur ve Devam Et</button>
+
+                </form>
+
+            </div>
+        </div>
+    </main>
+
+</div>
+
+</body>
+</html>

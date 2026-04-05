@@ -71,7 +71,10 @@ public class ProductSetupController {
         try {
             Tenant tenant = tenantOnboardingService.createTenant(setupForm.getInstitutionName(), productCode);
             checkoutSessionService.consume(paymentToken);
-            return "redirect:/" + tenant.getSlug() + "/students";
+
+            // KRİTİK: login değil, setup'a git
+            return "redirect:/" + tenant.getSlug() + "/setup";
+
         } catch (IllegalArgumentException ex) {
             model.addAttribute("pageTitle", product.getName() + " Kurulum");
             model.addAttribute("product", product);

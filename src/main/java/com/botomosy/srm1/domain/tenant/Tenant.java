@@ -39,6 +39,9 @@ public class Tenant {
     @Column(nullable = false)
     private LocalDateTime createdAt;
 
+    @Column(length = 120)
+    private String ownerEmail;
+
     public Tenant() {
     }
 
@@ -127,5 +130,13 @@ public class Tenant {
 
     public void setCreatedAt(LocalDateTime createdAt) {
         this.createdAt = createdAt;
+    }
+
+    public String getOwnerEmail() {
+        return ownerEmail;
+    }
+
+    public void setOwnerEmail(String ownerEmail) {
+        this.ownerEmail = ownerEmail;
     }
 }

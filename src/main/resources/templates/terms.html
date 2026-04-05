@@ -12,7 +12,64 @@
         <div class="page-container">
             <div class="card">
                 <h1>Dönemler</h1>
-                <p>Dönem yönetimi ekranı burada olacak.</p>
+
+                <div class="alert alert-info" th:if="${activeTermName != null}">
+                    Aktif Dönem: <strong th:text="${activeTermName}">2026-2027</strong>
+                </div>
+
+                <div th:if="${successMessage != null}" class="alert alert-success" th:text="${successMessage}">
+                    Başarılı
+                </div>
+
+                <div th:if="${errorMessage != null}" class="alert alert-error" th:text="${errorMessage}">
+                    Hata
+                </div>
+
+                <form th:action="@{/{tenantSlug}/terms(tenantSlug=${tenantSlug})}" method="post" style="margin-bottom:20px;">
+                    <div class="field">
+                        <label>Dönem Adı</label>
+                        <input type="text" name="name" placeholder="Örn: 2027-2028" required>
+                    </div>
+
+                    <button type="submit">Dönem Oluştur</button>
+                </form>
+
+                <table>
+                    <tr>
+                        <th>ID</th>
+                        <th>Dönem</th>
+                        <th>Durum</th>
+                        <th>İşlem</th>
+                    </tr>
+
+                    <tr th:if="${#lists.isEmpty(terms)}">
+                        <td colspan="4">Henüz dönem yok.</td>
+                    </tr>
+
+                    <tr th:each="term : ${terms}">
+                        <td th:text="${term.id}">1</td>
+                        <td th:text="${term.name}">2026-2027</td>
+                        <td th:text="${term.active ? 'Aktif' : 'Pasif'}">Aktif</td>
+                        <td>
+                            <div style="display:flex; gap:8px; flex-wrap:wrap;">
+                                <form th:if="${!term.active}"
+                                      th:action="@{/{tenantSlug}/terms/{termId}/activate(tenantSlug=${tenantSlug}, termId=${term.id})}"
+                                      method="post">
+                                    <button type="submit">Aktif Yap</button>
+                                </form>
+
+                                <form th:if="${!term.active}"
+                                      th:action="@{/{tenantSlug}/terms/{termId}/delete(tenantSlug=${tenantSlug}, termId=${term.id})}"
+                                      method="post"
+                                      onsubmit="return confirm('Bu dönemi silmek istiyor musunuz?');">
+                                    <button type="submit">Sil</button>
+                                </form>
+
+                                <span th:if="${term.active}">Seçili dönem</span>
+                            </div>
+                        </td>
+                    </tr>
+                </table>
             </div>
         </div>
     </main>

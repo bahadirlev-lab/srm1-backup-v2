@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
-    <th:block th:replace="~{fragments/layout :: head(${pageTitle})}"></th:block>
+    <th:block th:replace="~{fragments/layout :: head('Dashboard')}"></th:block>
 </head>
 <body>
 
@@ -10,24 +10,114 @@
 
     <main class="content-area">
         <div class="page-container">
+
             <div class="card">
+
                 <h1>Dashboard</h1>
 
-                <p th:text="${message}">Mesaj</p>
+                <!-- 🔥 SAYILAR -->
+                <div class="stats-grid">
 
-                <div th:if="${tenant != null}">
-                    <p><strong>ID:</strong> <span th:text="${tenant.id}">1</span></p>
-                    <p><strong>Ad:</strong> <span th:text="${tenant.name}">Kurs Merkezi</span></p>
-                    <p><strong>Slug:</strong> <span th:text="${tenant.slug}">kurs-merkezi</span></p>
+                    <div class="stat-card">
+                        <div>Toplam Öğrenci</div>
+                        <strong th:text="${totalStudents}"></strong>
+                    </div>
+
+                    <div class="stat-card">
+                        <div>Öğrenci Limiti</div>
+                        <strong th:text="${studentLimit}"></strong>
+                    </div>
+
+                    <div class="stat-card">
+                        <div>Toplam Beklenen Tahsilat</div>
+                        <strong th:text="${#numbers.formatDecimal(totalExpected,0,'POINT',0,'POINT')} + ' TL'"></strong>
+                    </div>
+
+                    <div class="stat-card">
+                        <div>Toplam Yapılan Tahsilat</div>
+                        <strong th:text="${#numbers.formatDecimal(totalPaid,0,'POINT',0,'POINT')} + ' TL'"></strong>
+                    </div>
+
+                    <div class="stat-card">
+                        <div>Bu Ay Beklenen</div>
+                        <strong th:text="${#numbers.formatDecimal(monthExpected,0,'POINT',0,'POINT')} + ' TL'"></strong>
+                    </div>
+
+                    <div class="stat-card">
+                        <div>Bu Ay Yapılan</div>
+                        <strong th:text="${#numbers.formatDecimal(monthPaid,0,'POINT',0,'POINT')} + ' TL'"></strong>
+                    </div>
+
                 </div>
 
-                <p th:if="${tenant == null}" class="muted">
-                    Örnek kullanım: /kurs-merkezi
-                </p>
+                <!-- 🔥 OWNER -->
+                <div class="card" style="margin-top:20px;">
+                    <strong>Owner:</strong>
+                    <span th:text="${ownerEmail}"></span>
+                </div>
+
+                <!-- 🔥 GECİKENLER -->
+                <div class="card" style="margin-top:20px;">
+                    <h3>Geciken Ödemeler</h3>
+
+                    <table>
+                        <tr>
+                            <th>Öğrenci</th>
+                            <th>Gecikme (gün)</th>
+                            <th>Tutar</th>
+                        </tr>
+
+                        <tr th:each="i : ${overdueList}">
+                            <td th:text="${i.student.name}"></td>
+                            <td th:text="${T(java.time.temporal.ChronoUnit).DAYS.between(i.dueDate, T(java.time.LocalDate).now())}"></td>
+                            <td th:text="${#numbers.formatDecimal(i.amount,0,'POINT',0,'POINT')} + ' TL'"></td>
+                        </tr>
+
+                    </table>
+                </div>
+
+                <!-- 🔥 GRAFİK -->
+                <div class="card" style="margin-top:20px;">
+                    <h3>Son 6 Ay Tahsilat</h3>
+                    <canvas id="revenueChart"></canvas>
+                </div>
+
             </div>
+
         </div>
     </main>
 </div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script th:inline="javascript">
+    const labels = [[${chartLabels}]];
+    const data = [[${chartData}]];
+
+    const ctx = document.getElementById('revenueChart');
+
+    new Chart(ctx, {
+        type: 'pie',
+        data: {
+            labels: labels,
+            datasets: [{
+                data: data
+            }]
+        },
+        options: {
+            plugins: {
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            let value = context.raw || 0;
+                            return value.toLocaleString('tr-TR') + " TL";
+                        }
+                    }
+                }
+            }
+        }
+    });
+</script>
 
 </body>
 </html>

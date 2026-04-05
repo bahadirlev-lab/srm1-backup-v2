@@ -14,6 +14,12 @@
         <div class="sidebar-title" th:text="${tenant.name}">Tenant</div>
         <div class="sidebar-subtitle">Tenant Yönetimi</div>
 
+        <!-- 🔥 KULLANICI EMAIL -->
+        <div th:if="${sessionUsername != null}" class="user-box">
+            <div class="user-label">Giriş yapan</div>
+            <div class="user-email" th:text="${sessionUsername}">email</div>
+        </div>
+
         <div class="tenant-plan-box">
             <div><strong>Plan:</strong> <span th:text="${tenant.plan}">BASIC</span></div>
             <div><strong>Öğrenci Limit:</strong> <span th:text="${tenant.studentLimit}">100</span></div>
@@ -30,6 +36,10 @@
             <a th:href="@{/{tenantSlug}/terms(tenantSlug=${tenantSlug})}">Dönemler</a>
             <a th:href="@{/{tenantSlug}/classrooms(tenantSlug=${tenantSlug})}">Sınıflar</a>
         </nav>
+
+        <form th:action="@{/{tenantSlug}/logout(tenantSlug=${tenantSlug})}" method="post" style="margin-top:16px;">
+            <button type="submit">Çıkış Yap</button>
+        </form>
     </aside>
 </div>
 

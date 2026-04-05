@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <th:block th:replace="~{fragments/layout :: head(${pageTitle})}"></th:block>
+</head>
+<body>
+
+<div class="app-shell">
+    <aside class="sidebar">
+        <div class="sidebar-title" th:text="${tenant.name}">Tenant</div>
+        <div class="sidebar-subtitle">Giriş Yap</div>
+    </aside>
+
+    <main class="content-area">
+        <div class="page-container">
+            <div class="card" style="max-width: 520px;">
+                <h1>Giriş Yap</h1>
+
+                <div th:if="${errorMessage != null}" class="alert alert-error" th:text="${errorMessage}">
+                    Hata
+                </div>
+
+                <form th:action="@{/{tenantSlug}/login(tenantSlug=${tenantSlug})}" method="post" th:object="${loginForm}">
+                    <div class="field">
+                        <label>Email</label>
+                        <input type="text" th:field="*{username}">
+                    </div>
+
+                    <div class="field">
+                        <label>Şifre</label>
+                        <input type="password" th:field="*{password}">
+                    </div>
+
+                    <button type="submit">Giriş Yap</button>
+                </form>
+
+                <div class="alert alert-info" style="margin-top: 20px;">
+                    Demo kullanıcı: <strong>admin</strong> / <strong>123456</strong>
+                </div>
+            </div>
+        </div>
+    </main>
+</div>
+
+</body>
+</html>
